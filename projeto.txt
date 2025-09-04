@@ -1,0 +1,115 @@
+import numpy as np
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+import heapq
+
+# --- Parte 1: Dados fictícios de entregas (latitude, longitude) ---
+entregas = np.array([
+    [1, 1],
+    [2, 1],
+    [3, 1],
+    [10, 10],
+    [10, 11],
+    [11, 10],
+    [20, 20],
+    [21, 21],
+    [22, 22]
+])
+
+# Número de clusters (exemplo: 3 entregadores)
+k = 3
+
+# --- Parte 2: Aplicar K-Means ---
+kmeans = KMeans(n_clusters=k, random_state=0)
+kmeans.fit(entregas)
+
+labels = kmeans.labels_
+centroids = kmeans.cluster_centers_
+
+print("Clusters e pontos:")
+for i in range(k):
+    cluster_points = entregas[labels == i]
+    print(f"Cluster {i+1}:")
+    print(cluster_points)
+    print(f"Centróide: {centroids[i]}\n")
+
+# Visualizar clusters
+plt.scatter(entregas[:, 0], entregas[:, 1], c=labels, cmap='viridis', marker='o')
+plt.scatter(centroids[:, 0], centroids[:, 1], c='red', marker='x', s=200)
+plt.title("Clusters de Entregas (K-Means)")
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.show()
+
+# --- Parte 3: Exemplo simples de A* para um cluster ---
+# Vamos fazer a rota para o Cluster 1, que é os pontos perto de [1,1]
+
+# Definir um grafo simples entre pontos (com pesos baseados em distância euclidiana)
+# Aqui, vamos construir o grafo apenas para os pontos do cluster selecionado
+
+def euclidean_distance(a, b):
+    return np.linalg.norm(np.array(a) - np.array(b))
+
+def build_graph(points):
+    graph = {}
+    n = len(points)
+    for i in range(n):
+        graph[i] = []
+        for j in range(n):
+            if i != j:
+                dist = euclidean_distance(points[i], points[j])
+                graph[i].append((j, dist))
+    return graph
+
+# A* simples entre dois nós num grafo
+def a_star(graph, start, goal, points):
+    open_set = []
+    heapq.heappush(open_set, (0, start))
+    came_from = {}
+    g_score = {node: float('inf') for node in graph}
+    g_score[start] = 0
+    f_score = {node: float('inf') for node in graph}
+    f_score[start] = euclidean_distance(points[start], points[goal])
+
+    while open_set:
+        _, current = heapq.heappop(open_set)
+        if current == goal:
+            # Reconstruir caminho
+            path = []
+            while current in came_from:
+                path.append(current)
+                current = came_from[current]
+            path.append(start)
+            path.reverse()
+            return path
+
+        for neighbor, cost in graph[current]:
+            tentative_g_score = g_score[current] + cost
+            if tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + euclidean_distance(points[neighbor], points[goal])
+                if not any(item[1] == neighbor for item in open_set):
+                    heapq.heappush(open_set, (f_score[neighbor], neighbor))
+    return None
+
+# Pegando os pontos do Cluster 1
+cluster_index = 0
+cluster_points = entregas[labels == cluster_index]
+
+# Construindo grafo
+graph = build_graph(cluster_points)
+
+# Calculando rota de ponto 0 até o último ponto do cluster
+start_node = 0
+goal_node = len(cluster_points) - 1
+
+path = a_star(graph, start_node, goal_node, cluster_points)
+
+print(f"Rota do ponto {start_node} até {goal_node} no Cluster {cluster_index+1}:")
+if path:
+    for p in path:
+        print(f"Entrega no ponto: {cluster_points[p]}")
+else:
+    print("Caminho não encontrado.")
+
