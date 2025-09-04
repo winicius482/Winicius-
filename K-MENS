@@ -1,0 +1,43 @@
+Entregas Otimizadas com K-Means e Algoritmo A*
+
+Este projeto demonstra uma abordagem simples para otimizar rotas de entregas usando clustering e busca heurística.
+
+Descrição do Código
+
+O código está dividido em três partes principais:
+
+1. Dados e Clustering com K-Means
+
+Criamos um conjunto fictício de pontos de entrega, representados por coordenadas (latitude, longitude).
+
+Usamos o algoritmo K-Means para agrupar esses pontos em k clusters, simulando a divisão das entregas entre k entregadores.
+
+Cada cluster representa as entregas que um entregador específico deve realizar.
+
+Os centróides calculados pelo K-Means indicam o "centro" aproximado de cada grupo de entregas.
+
+Visualizamos os clusters e os centróides usando um gráfico.
+
+2. Construção de Grafo para um Cluster
+
+Selecionamos um cluster específico para planejar a rota de entregas dentro dele.
+
+Construímos um grafo onde cada ponto de entrega é um nó.
+
+As arestas conectam todos os pares de nós, com peso baseado na distância euclidiana entre eles.
+
+3. Algoritmo A* para Encontrar a Rota entre Dois Pontos
+
+Aplicamos o algoritmo A* para encontrar o caminho de menor custo entre o primeiro ponto e o último ponto do cluster selecionado.
+
+O algoritmo usa a distância euclidiana como heurística para guiar a busca.
+
+O resultado é uma rota ótima para ir do ponto inicial ao final dentro daquele cluster.
+
+Pontos de Melhoria
+
+O algoritmo A* aqui é aplicado entre dois pontos, não resolve o problema clássico de visitar todos os pontos do cluster (roteamento de entregas completo).
+
+Para uma rota que passa por todos os pontos (problema do caixeiro-viajante), seria necessário implementar algoritmos específicos para esse fim.
+
+Visualizar a rota encontrada no gráfico pode facilitar a compreensão.
